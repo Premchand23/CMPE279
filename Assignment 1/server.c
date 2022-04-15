@@ -6,8 +6,24 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <sys/types.h>
+#include <pwd.h>
 
 #define PORT 80
+int drop_privilege(){
+    struct passwd* pwd;
+    pid_t childPID, pid;
+    childPID = fork();
+    if(childPID ==0){
+        printf("Fork is successful");
+        pwd = getpwnam("nobody");
+        pid= setuid(pwd->pw_uid);
+        if(pid==0){
+            return 1;
+        }
+        return 0;
+    }
+}
 int main(int argc, char const *argv[])
 {
     int server_fd, new_socket, valread;
@@ -28,8 +44,7 @@ int main(int argc, char const *argv[])
     }
 
     // Attaching socket to port 80
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-                                                  &opt, sizeof(opt)))
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) 
     {
         perror("setsockopt");
         exit(EXIT_FAILURE);
@@ -56,9 +71,13 @@ int main(int argc, char const *argv[])
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    valread = read( new_socket , buffer, 1024);
-    printf("%s\n",buffer );
-    send(new_socket , hello , strlen(hello) , 0 );
-    printf("Hello message sent\n");
+
+    if(drop_privilege()){
+        valread = read( new_socket , buffer, 1024);
+        printf("%s\n",buffer );
+        send(new_socket , hello , strlen(hello) , 0 );
+        printf("Hello message sent\n");\
+    }
+    /*wait(0);*/
     return 0;
 }
