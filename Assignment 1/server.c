@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 
-#define PORT 80
+#define PORT 8080
 int drop_privilege(){
     struct passwd* pwd;
     pid_t childPID, pid;
