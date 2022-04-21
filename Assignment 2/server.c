@@ -45,14 +45,11 @@ int main(int argc, char const *argv[])
     char buffer[1024] = {0};
     char *hello = "Hello from server";
 
-
-     //compare if the running one is child process
-     
+     //check if the running one is child process
      if(strcmp(argv[0],"socket")==0)
-     {
-     	
+     {    	
      	printf("\nRunning in child process");
-     	//taking new socket
+     	//new socket
      	int newSocket = atoi(argv[1]);
      	
      	valread = read(newSocket, buffer, 1024);
@@ -66,7 +63,7 @@ int main(int argc, char const *argv[])
      }
 
 
-    // Creating socket file descriptor
+    //Creating socket descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
         perror("socket failed");
@@ -102,7 +99,7 @@ int main(int argc, char const *argv[])
         exit(EXIT_FAILURE);
     }
 
-    //drop privilages 
+    //drop privileges 
     if(drop_privileges()){
          //message processing
             valread = read(new_socket, buffer, 1024);
@@ -111,24 +108,15 @@ int main(int argc, char const *argv[])
             printf("Hello message sent\n");
             
             //code for second assignemnt 
-            
             int CopyParent = dup(new_socket);
-            
             if(CopyParent==-1)
            		perror("socket dup function failed");
-           
-           
-            //convert socket to string
-            
-            char stringSocket[10];
-            
+         
+            //convert socket to string            
+            char stringSocket[10];      
             sprintf(stringSocket,"%d",CopyParent);
-            
             char *args[] = {"socket",stringSocket,NULL};
-            
             execvp(argv[0],args);
-            
-            
     }
     return 0;
 }
